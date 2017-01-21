@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+
+  <remote fetch="https://github.com" name="github_altera"/>
+  <remote fetch="https://github.com" name="github_arrow_socfpga"/>
+  
+  <?ignore remove layers we don't need ?>
+  <remove-project name="kraj/meta-altera" />
+  <remove-project name="96boards/meta-96boards" />
+  <remove-project name="koenkooi/meta-dominion" />
+  <remove-project name="ndechesne/meta-qcom" />
+  <remove-project name="meta-intel" />
+  <remove-project name="Freescale/meta-freescale-3rdparty" />
+  <remove-project name="balister/meta-ettus" />
+  <remove-project name="bmwcarit/meta-ros" />
+  <remove-project name="koenkooi/meta-edison" />
+  <remove-project name="koenkooi/meta-photography" />
+  <remove-project name="koenkooi/meta-uav" />
+  <remove-project name="kraj/meta-nslu2" />
+  <remove-project name="linux-sunxi/meta-sunxi" />
+  <remove-project name="linux4sam/meta-atmel" />
+  <remove-project name="meta-freescale" />
+  <remove-project name="meta-handheld" />
+  <remove-project name="meta-intel-iot-middleware" />
+  <remove-project name="meta-java" />
+  <remove-project name="meta-maker" />
+  <remove-project name="meta-mono" />
+  <remove-project name="meta-opie" />
+  <remove-project name="meta-qt4" />
+  <remove-project name="meta-qt5/meta-qt5" />
+  <remove-project name="meta-raspberrypi" />
+  <remove-project name="meta-ti" />
+  <remove-project name="meta-xilinx" />
+  <remove-project name="openpandora/meta-openpandora" />
+  <remove-project name="schnitzeltony/meta-gumstix-community" />
+  <remove-project name="shr-distribution/meta-smartphone" />
+  <remove-project name="slimlogic/meta-exynos" />
+  <remove-project name="sysmocom/meta-telephony" />
+
+  <?ignore add layers we do need ?>
+  <project remote="github_altera"  name="altera-opensource/meta-altera" path="sources/meta-altera" revision="angstrom-v2015.12-yocto2.0"/>
+  <project remote="github_altera"  name="altera-opensource/meta-altera-refdes" path="sources/meta-altera-refdes" revision="gsrd-16.1"/>
+  <?ignore until uploaded <project remote="github_arrow_socfpga"  name="arrow-socfpga/meta-chameleon96" path="sources/meta-chameleon96" revision="gsrd-16.1"/> ?>
+  
+</manifest>
+

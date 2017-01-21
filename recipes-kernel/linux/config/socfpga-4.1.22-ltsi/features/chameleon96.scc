@@ -1,0 +1,6 @@
+define KFEATURE_DESCRIPTION "Chameleon96 Extra Feature Support"
+define KFEATURE_COMPATIBILITY board
+
+kconf non-hardware cfg/gpio-keys.cfg
+kconf non-hardware cfg/led-triggers.cfg
+kconf non-hardware cfg/usb-gadget.cfg
