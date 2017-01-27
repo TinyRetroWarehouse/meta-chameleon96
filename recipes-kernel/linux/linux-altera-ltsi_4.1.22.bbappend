@@ -9,11 +9,11 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/config:"
 #			"
 
 # bitbake is not finding the file in ./dts; copied .dts file to linux/config ...that's because FILESEXTRAPATHS_prepend was pointing to /config ...
-# still need to patch the dts makefile to include this .dts
+
 SRC_URI_append_chameleon96 = " file://socfpga_cyclone5_chameleon96.dts"
 
-#do_patch_append () {                                                            
-##        cp ${WORKDIR}/devicetrees/*.dts ${S}/arch/arm/boot/dts
-#        cp ${WORKDIR}/config/*.dts ${S}/arch/arm/boot/dts                          
-#}  
+do_compile_prepend () {                                                            
+
+        cp ${WORKDIR}/*.dts ${S}/arch/${ARCH}/boot/dts                          
+}  
 
