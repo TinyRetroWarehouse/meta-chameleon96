@@ -1,19 +1,18 @@
 PR = "r0"
 FILESEXTRAPATHS_prepend := "${THISDIR}/config:"
-# ${PN} expands to linux-altera-ltsi, so a subdirectory with this name must exist if using next line
-#FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-# this results in error
-#SRC_URI_append += " \
-#			file://${KBRANCH};type=kmeta;destsuffix=${KBRANCH} \
-#			"
-
-# bitbake is not finding the file in ./dts; copied .dts file to linux/config ...that's because FILESEXTRAPATHS_prepend was pointing to /config ...
-
-SRC_URI_append_chameleon96 = " file://socfpga_cyclone5_chameleon96.dts"
+SRC_URI_append_chameleon96 = " \
+				file://socfpga_cyclone5_chameleon96.dts \
+				file://socfpga-4.1-ltsi/cfg/altvipfb.cfg \
+				file://socfpga-4.1-ltsi/cfg/block.cfg \
+				file://socfpga-4.1-ltsi/cfg/cma.cfg \
+				file://socfpga-4.1-ltsi/cfg/configfs.cfg \
+				file://socfpga-4.1-ltsi/cfg/gpio-keys.cfg \
+				file://socfpga-4.1-ltsi/cfg/led-triggers.cfg \
+				file://socfpga-4.1-ltsi/cfg/usb_gadget.cfg \
+				"
 
 do_compile_prepend () {                                                            
 
-        cp ${WORKDIR}/*.dts ${S}/arch/${ARCH}/boot/dts                          
+        cp ${WORKDIR}/socfpga_cyclone5_chameleon96.dts ${S}/arch/${ARCH}/boot/dts                          
 }  
-
