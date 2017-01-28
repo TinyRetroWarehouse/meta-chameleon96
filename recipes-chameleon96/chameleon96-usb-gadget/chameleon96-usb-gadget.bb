@@ -3,7 +3,8 @@ DESCRIPTION = "Chameleon96 scripts to start USB gadget for USB mass storage, Eth
 AUTHOR = "Dan Negvesky <dnegvesky@arrow.com>"
 SECTION = "chameleon96"
 
-PR = "r7"
+PR = "r1"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 inherit systemd
 
@@ -17,8 +18,8 @@ SRCREV = "${AUTOREV}"
 # ERROR: ExpansionError during parsing /home/dan/work/96boards/angstrom-v2015.12-yocto2.0/angstrom-manifest/sources/meta-chameleon96/recipes-chameleon96/chameleon96-usb-gadget/chameleon96-usb-gadget_1.0.bb: Failure expanding variable S: ExpansionError: Failure expanding variable SRCPV, expression was ${@bb.fetch2.get_srcrev(d)} which triggered exception FetchError: Fetcher failure: SRCREV was used yet no valid SCM was found in SRC_URI
 #see here: http://lists.openembedded.org/pipermail/openembedded-core/2012-December/072511.html
 
-#PV = "1.0${PR}+git${SRCPV}"
-PV = "1.0"
+PV = "1.0${PR}+git${SRCPV}"
+#PV = "1.0"
 
 #SRC_URI = "file://atlassoc-gadget-init.service \
 #           file://udhcpd.conf \

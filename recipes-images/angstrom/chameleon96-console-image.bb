@@ -7,28 +7,30 @@ require recipes-images/angstrom/console-image.bb
 #	chameleon96-webcontent (backslash)
 	
 IMAGE_INSTALL += " \
-	kernel-modules \
-	kernel-dev \
-	linux-firmware \
-	usbutils \
-	libusbg \
-	iw \
-        systemd-analyze \
-        vim vim-vimrc \
-        procps \
-        screen minicom \
-        cronie-systemd ntpdate \
-        tar \
-        packagegroup-sdk-target \
-	gcc \
-        gdb gdbserver \
-        iproute2 \
-	lighttpd \
-        lighttpd-module-cgi \
+	bash \
 	chameleon96-lighttpd-conf \
 	chameleon96-usb-gadget \
+	ethtool \
+	gcc \
+	gdb \
+	gdbserver \
 	gnuplot \
-	cmake \
+	i2c-tools \
+	iperf \
+	iw \
+	kernel-dev \
+	kernel-image \
+	kernel-modules \
+	lighttpd \
+	lighttpd-module-cgi \
+	ne10 \
+	net-tools \
+	nfs-utils-client \
+	packagegroup-sdk-target \
+	tar \
+	usbutils \
+	vim \
+	vim-vimrc \
 "
 export IMAGE_BASENAME = "chameleon96-console-image"
 
@@ -39,3 +41,8 @@ rootfs_update_timestamp () {
 }
 
 EXPORT_FUNCTIONS rootfs_update_timestamp
+
+# add later
+#	chameleon96-fpga-init \
+#	chameleon96-fpga-leds \
+#	linux-firmware-chameleon96 \

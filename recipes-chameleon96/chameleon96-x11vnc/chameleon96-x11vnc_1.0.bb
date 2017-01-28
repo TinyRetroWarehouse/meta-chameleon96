@@ -3,7 +3,8 @@ DESCRIPTION = "Chameleon96 scripts to start x11vnc"
 AUTHOR = "Dan Negvesky <dnegvesky@arrow.com>"
 SECTION = "chameleon96"
 
-PR = "r9"
+PV = "1.0"
+PR = "r0"
 
 inherit systemd
 

@@ -9,6 +9,7 @@ inherit allarch
 ALLOW_EMPTY_${PN} = "1"
 
 PR = "r1"
+PV = "1.0${PR}"
 
 # Post process the lighttpd.conf file to enable cgi module, sets home page and update 404 page
 pkg_postinst_${PN}() {
