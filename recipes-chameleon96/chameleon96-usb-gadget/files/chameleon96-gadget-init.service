@@ -4,7 +4,7 @@ After=dev-mmcblk0p1.device
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/g-ether-load.sh
+ExecStart=/usr/bin/chameleon96-gadget-init.sh
 
 [Install]
 WantedBy=basic.target
