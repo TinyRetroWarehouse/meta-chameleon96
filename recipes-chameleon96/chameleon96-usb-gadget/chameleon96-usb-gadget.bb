@@ -28,9 +28,9 @@ PV = "1.0${PR}+git${SRCPV}"
 #          "
 
 SRC_URI = "file://chameleon96-gadget-init.service \
-           file://udhcpd.conf \
-           file://g-ether-load.sh \
+           file://chameleon96-gadget-init.sh \
            file://fat_files.img.tgz \
+           file://udhcpd.conf \
           "
 
 do_install() {

@@ -9,7 +9,7 @@ SRC_URI_append_chameleon96 = " \
 				file://socfpga-4.1-ltsi/cfg/configfs.cfg \
 				file://socfpga-4.1-ltsi/cfg/gpio-keys.cfg \
 				file://socfpga-4.1-ltsi/cfg/led-triggers.cfg \
-				file://socfpga-4.1-ltsi/cfg/usb_gadget.cfg \
+				file://socfpga-4.1-ltsi/cfg/usb-gadget.cfg \
 				"
 
 do_compile_prepend () {                                                            
