@@ -15,7 +15,13 @@ SRCREV_chameleon96 = "${AUTOREV}"
 
 SRC_URI_append = "\
 	file://chameleon96.env \
+	file://socfpga_chameleon96_defconfig
 	"
+
+do_compile_prepend () {                                                            
+
+        cp ${WORKDIR}/socfpga_chameleon96_defconfig ${S}/git/configs                          
+}  
 
 #SRC_URI_append_de0-nano = " \
 #	git:///data/atlas-soc/angstrom/de10-nano-hardware.git;destsuffix=de-nano-ghrd;name=de-nano-ghrd;branch=RELEASE_BUILDS \
