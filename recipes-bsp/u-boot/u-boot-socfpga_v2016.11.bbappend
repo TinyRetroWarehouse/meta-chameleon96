@@ -20,7 +20,7 @@ SRC_URI_append = "\
 
 do_compile_prepend () {                                                            
 
-        cp ${WORKDIR}/socfpga_chameleon96_defconfig ${S}/git/configs                          
+        cp ${WORKDIR}/socfpga_chameleon96_defconfig ${S}/configs                          
 }  
 
 #SRC_URI_append_de0-nano = " \
