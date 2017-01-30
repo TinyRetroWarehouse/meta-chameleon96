@@ -15,7 +15,7 @@ SRCREV_chameleon96 = "${AUTOREV}"
 
 SRC_URI_append = "\
 	file://chameleon96.env \
-	file://socfpga_chameleon96_defconfig
+	file://socfpga_chameleon96_defconfig \
 	"
 
 do_compile_prepend () {                                                            
