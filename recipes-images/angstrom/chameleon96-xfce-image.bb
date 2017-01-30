@@ -20,4 +20,4 @@ IMAGE_INSTALL += " \
 	xterm \
 "
 
-export IMAGE_BASENAME = "chameleon96-image"
+export IMAGE_BASENAME = "chameleon96-xfce-image"
