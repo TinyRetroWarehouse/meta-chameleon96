@@ -16,11 +16,32 @@ SRCREV_chameleon96 = "${AUTOREV}"
 SRC_URI_append = "\
 	file://chameleon96.env \
 	file://socfpga_chameleon96_defconfig \
+	file://socfpga_chameleon96.h \
+	file://MAINTAINERS \
+	file://Makefile \
+	file://socfpga.c \
+	file://iocsr_config.h \
+	file://pinmux_config.h \
+	file://pll_config.h \
+	file://sdram_config.h \
 	"
 
-do_compile_prepend () {                                                            
+do_compile_prepend_chameleon96S () {                                                            
 
-        cp ${WORKDIR}/socfpga_chameleon96_defconfig ${S}/configs                          
+        cp ${WORKDIR}/socfpga_chameleon96_defconfig ${S}/configs
+        cp ${WORKDIR}/socfpga_chameleon96.h ${S}/include/configs
+        
+        mkdir ${S}/board/arrow
+        mkdir ${S}/board/arrow/chameleon96
+        cp ${WORKDIR}/MAINTAINERS ${S}/board/arrow/chameleon96
+        cp ${WORKDIR}/Makefile ${S}/board/arrow/chameleon96
+        cp ${WORKDIR}/socfpga.c ${S}/board/arrow/chameleon96
+        
+        mkdir ${S}/board/arrow/chameleon96/qts
+        cp ${WORKDIR}/iocsr_config.h ${S}/board/arrow/chameleon96/qts
+        cp ${WORKDIR}/pinmux_config.h ${S}/board/arrow/chameleon96/qts
+        cp ${WORKDIR}/pll_config.h ${S}/board/arrow/chameleon96/qts
+        cp ${WORKDIR}/sdram_config.h ${S}/board/arrow/chameleon96/qts
 }  
 
 #SRC_URI_append_de0-nano = " \
