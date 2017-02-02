@@ -1,0 +1,50 @@
+From 54f2f19f40bda6842b7355c2148b0be1f84c2d27 Mon Sep 17 00:00:00 2001
+From: Dan Negvesky <dnegvesky@arrow.com>
+Date: Wed, 1 Feb 2017 21:26:26 -0500
+Subject: [PATCH 1/2] add Chameleon96 support to Kconfig
+
+---
+ arch/arm/mach-socfpga/Kconfig | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/arch/arm/mach-socfpga/Kconfig b/arch/arm/mach-socfpga/Kconfig
+index d91b8bb..c78dd17 100644
+--- a/arch/arm/mach-socfpga/Kconfig
++++ b/arch/arm/mach-socfpga/Kconfig
+@@ -78,6 +78,10 @@ config TARGET_SOCFPGA_TERASIC_SOCKIT
+ 	bool "Terasic SoCkit (Cyclone V)"
+ 	select TARGET_SOCFPGA_CYCLONE5
+ 
++config TARGET_SOCFPGA_ARROW_CHAMELEON96
++	bool "Arrow Chameleon96 (Cyclone V)"
++	select TARGET_SOCFPGA_CYCLONE5
++
+ endchoice
+ 
+ config SYS_BOARD
+@@ -90,6 +94,7 @@ config SYS_BOARD
+ 	default "socrates" if TARGET_SOCFPGA_EBV_SOCRATES
+ 	default "sr1500" if TARGET_SOCFPGA_SR1500
+ 	default "vining_fpga" if TARGET_SOCFPGA_SAMTEC_VINING_FPGA
++	default "chameleon96" if TARGET_SOCFPGA_ARROW_CHAMELEON96
+ 
+ config SYS_VENDOR
+ 	default "altera" if TARGET_SOCFPGA_ARRIA5_SOCDK
+@@ -99,6 +104,7 @@ config SYS_VENDOR
+ 	default "samtec" if TARGET_SOCFPGA_SAMTEC_VINING_FPGA
+ 	default "terasic" if TARGET_SOCFPGA_TERASIC_DE0_NANO
+ 	default "terasic" if TARGET_SOCFPGA_TERASIC_SOCKIT
++	default "arrow" if TARGET_SOCFPGA_ARROW_CHAMELEON96
+ 
+ config SYS_SOC
+ 	default "socfpga"
+@@ -113,5 +119,6 @@ config SYS_CONFIG_NAME
+ 	default "socfpga_socrates" if TARGET_SOCFPGA_EBV_SOCRATES
+ 	default "socfpga_sr1500" if TARGET_SOCFPGA_SR1500
+ 	default "socfpga_vining_fpga" if TARGET_SOCFPGA_SAMTEC_VINING_FPGA
++	default "socfpga_chameleon96" if TARGET_SOCFPGA_ARROW_CHAMELEON96
+ 
+ endif
+-- 
+2.7.4
+

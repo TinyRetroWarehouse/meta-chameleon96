@@ -14,9 +14,12 @@ SRCREV_chameleon96 = "${AUTOREV}"
 #	"
 
 SRC_URI_append = "\
+	file://0001-add-Chameleon96-support-to-Kconfig.patch \
+	file://0002-add-Chameleon96-dtb-support-to-Makefile.patch \
 	file://chameleon96.env \
 	file://socfpga_chameleon96_defconfig \
 	file://socfpga_chameleon96.h \
+	file://socfpga_cyclone5_chameleon96.dts \
 	file://MAINTAINERS \
 	file://Makefile \
 	file://socfpga.c \
@@ -26,10 +29,11 @@ SRC_URI_append = "\
 	file://sdram_config.h \
 	"
 
-do_compile_prepend_chameleon96S () {                                                            
+do_compile_prepend_chameleon96 () {                                                            
 
         cp ${WORKDIR}/socfpga_chameleon96_defconfig ${S}/configs
         cp ${WORKDIR}/socfpga_chameleon96.h ${S}/include/configs
+        cp ${WORKDIR}/socfpga_cyclone5_chameleon96.dts ${S}/arch/arm/dts
         
         mkdir ${S}/board/arrow
         mkdir ${S}/board/arrow/chameleon96

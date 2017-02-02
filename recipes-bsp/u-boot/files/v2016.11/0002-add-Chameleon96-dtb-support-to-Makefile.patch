@@ -1,0 +1,24 @@
+From bd7ca0ac04d69084b7f5230426c9b7cd38d24fc3 Mon Sep 17 00:00:00 2001
+From: Dan Negvesky <dnegvesky@arrow.com>
+Date: Thu, 2 Feb 2017 11:11:41 -0500
+Subject: [PATCH 2/2] add Chameleon96 dtb support to Makefile
+
+---
+ arch/arm/dts/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 836a8c4..6de84a9 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -129,6 +129,7 @@ dtb-$(CONFIG_ARCH_SOCFPGA) +=				\
+ 	socfpga_cyclone5_socdk.dtb			\
+ 	socfpga_cyclone5_de0_nano_soc.dtb			\
+ 	socfpga_cyclone5_sockit.dtb			\
++	socfpga_cyclone5_chameleon96.dtb		\
+ 	socfpga_cyclone5_socrates.dtb			\
+ 	socfpga_cyclone5_sr1500.dtb			\
+ 	socfpga_cyclone5_vining_fpga.dtb
+-- 
+2.7.4
+
