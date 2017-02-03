@@ -41,7 +41,7 @@ do_install() {
 	( cd ${D}${sysconfdir}/systemd/system/getty.target.wants && ln -s /lib/systemd/system/serial-getty@.service serial-getty@ttyGS0.service )
 
 	install -d ${D}${datadir}/${PN}
-	tar -xzvf ${WORKDIR}/fat_image.img.tgz -C ${D}${datadir}/${PN}
+	tar -xzvf ${WORKDIR}/git/fat_image.img.tgz -C ${D}${datadir}/${PN}
 }
 
 PACKAGES =+ "${PN}-network ${PN}-udhcpd"
