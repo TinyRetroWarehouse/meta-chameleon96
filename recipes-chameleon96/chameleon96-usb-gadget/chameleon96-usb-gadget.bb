@@ -15,16 +15,10 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 SRCREV = "${AUTOREV}"
 PV = "1.0${PR}+git${SRCPV}"
 
-#SRC_URI = "file://atlassoc-gadget-init.service \
-#           file://udhcpd.conf \
-#           file://g-ether-load.sh \
-#           git://github.com/dwesterg/atlas-drivers.git \
-#          "
-
 SRC_URI = "file://chameleon96-gadget-init.service \
            file://chameleon96-gadget-init.sh \
            file://udhcpd.conf \
-	   git://github.com/dwesterg/atlas-drivers.git \
+           git://github.com/arrow-socfpga/chameleon96-drivers.git \
           "
 
 do_install() {

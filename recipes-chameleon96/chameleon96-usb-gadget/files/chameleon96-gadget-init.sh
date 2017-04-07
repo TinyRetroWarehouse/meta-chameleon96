@@ -1,6 +1,6 @@
 #!/bin/sh
 
-modprobe g_multi file=/usr/share/chameleon96-usb-gadget/fat_files.img
+modprobe g_multi file=/usr/share/chameleon96-usb-gadget/fat_image.img
 
 sleep 5
 

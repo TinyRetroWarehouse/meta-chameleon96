@@ -1,15 +1,14 @@
-# this is not available in kraj/meta-altera so point to console-image.bb instead
-# need to add additional packages below (dn 1/19/17)
-#require recipes-images/angstrom/extended-console-image.bb
 require recipes-images/angstrom/console-image.bb
 
-# add next line back in (below chameleon96-lighttpd-conf \) when chameleon96 webcontent is available
-#	chameleon96-webcontent (backslash)
-	
 IMAGE_INSTALL += " \
 	bash \
+	chameleon96-fpga-init \
 	chameleon96-lighttpd-conf \
+	chameleon96-linux-firmware \
 	chameleon96-usb-gadget \
+	chameleon96-webcontent \
+	chameleon96-x11vnc-init \
+	chameleon96-xfce-init \
 	ethtool \
 	gcc \
 	gdb \
@@ -23,10 +22,10 @@ IMAGE_INSTALL += " \
 	kernel-modules \
 	lighttpd \
 	lighttpd-module-cgi \
-	ne10 \
 	net-tools \
 	nfs-utils-client \
 	packagegroup-sdk-target \
+	python \
 	tar \
 	usbutils \
 	vim \
@@ -43,6 +42,4 @@ rootfs_update_timestamp () {
 EXPORT_FUNCTIONS rootfs_update_timestamp
 
 # add later
-#	chameleon96-fpga-init \
 #	chameleon96-fpga-leds \
-#	linux-firmware-chameleon96 \

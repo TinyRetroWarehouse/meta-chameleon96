@@ -5,14 +5,11 @@ SECTION = "chameleon96"
 LICENSE = "MIT & LGPLv3"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=a8f924340e3ce1ff14c0f9f53b9a6da4"
 
-PR = "r4"
+PR = "r1"
 SRCREV = "${AUTOREV}"
-#when PV is set to include SRCPV, this results in a variable expansion error, see here:
-#http://lists.openembedded.org/pipermail/openembedded-core/2012-December/072511.html
-#PV = "1.0${PR}+git${SRCPV}"
-PV = "1.0"
+PV = "1.0${PR}+git${SRCPV}"
 
-SRC_URI = "git://github.com/arrow-socfpga/meta-chameleon96/chameleon96-webcontent.git"
+SRC_URI = "git://github.com/arrow-socfpga/chameleon96-webcontent.git"
 S = "${WORKDIR}/git"
 
 inherit allarch
