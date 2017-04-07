@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2016 Arrow Electronics, Inc.
+ *  Copyright (C) 2017 Arrow Electronics, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #include "socfpga_cyclone5.dtsi"
 
 / {
-	model = "Arrow Chameleon96 Board";
+	model = "Arrow Chameleon96";
 	compatible = "altr,socfpga-cyclone5", "altr,socfpga";
 
 	chosen {
@@ -32,112 +32,12 @@
 		reg = <0x0 0x20000000>; /* 512MB */
 	};
 
-	soc {
-		clkmgr@ffd04000 {
-			clocks {
-				#clock-cells = <0>;
-							   
-				clk_0: clk_0 {
-					#clock-cells = <0>;
-					compatible = "fixed-clock";	
-					clock-frequency = <50000000>;
-					clock-output-names = "clk_0-clk";
-				};
-				
-				fft_sub_clk_0: fft_sub_clk_0 {
-					#clock-cells = <0>;
-					compatible = "fixed-clock";
-					clock-frequency = <50000000>;
-					clock-output-names = "fft_sub_clk_0-clk";
-				}; 
-							
-			};
-		};
-		
-		base_fpga_region: base-fpga-region {
-			compatible = "fpga-region";
-			fpga-mgr = <&fpga_mgr>;
-			fpga-bridges = <&fpga_bridge0>, <&fpga_bridge1>,
-					<&fpga_bridge2>, <&fpga_bridge3>;
-	
-			#address-cells = <0x1>;
-			#size-cells = <0x1>;
-			ranges = <0 0xff200000 0x100000>,
-				 <1 0xc0000000 0x20000000>;
-			
-			alt_vip_vfr_0: vip@0x00000100 {
-			compatible = "altr,vip-frame-reader-1.0";
-			reg = <0x00000100 0x00000080>;
-			max-width = <1920>;
-			max-height = <1080>;
-			bits-per-color = <8>;
-			mem-word-width = <128>;
-			};
-			
-			jtag_uart: serial@0x100020000 {
-				compatible = "altr,juart-15.1", "altr,juart-1.0";
-				reg = <0x00020000 0x00000008>;
-				//interrupt-parent = <&hps_0_arm_gic_0>;
-				interrupts = <0 42 4>;
-				clocks = <&clk_0>;
-			}; //end serial@0x100020000 (jtag_uart)
-
-			sysid_qsys: sysid@0x100010000 {
-				compatible = "altr,sysid-15.1", "altr,sysid-1.0";
-				reg = <0x00010000 0x00000008>;
-				clocks = <&clk_0>;
-				id = <2899645186>;	/* embeddedsw.dts.params.id type NUMBER */
-				timestamp = <1461878490>;	/* embeddedsw.dts.params.timestamp type NUMBER */
-			}; //end sysid@0x100010000 (sysid_qsys)
-
-		};
-
+	regulator_3_3v: 3-3-v-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "3.3V";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
 	};
-		
-};
-
-&uart0 {
-	status = "okay";
-};
-
-&uart1 {
-	status = "okay";
-};
-
-&usb1 {
-	status = "okay";
-};
-
-&i2c0 {
-	status = "okay";
-        //http://processors.wiki.ti.com/index.php/Linux_Core_LCD_Controller_User_Guide
-        tda998x: hdmi@73 {
-		compatible = "nxp,tda998x";
-		reg = <0x73>;
-                //optional
-		//interrupt-parent = <&intc>;
-		//interrupts = <27 2>;		/* falling edge */
-	};
-};
-
-&i2c1 {
-	status = "okay";
-};
-
-&i2c2 {
-	status = "okay";
-};
-
-&i2c3 {
-	status = "okay";
-};
-
-&spi0 {
-	status = "okay";
-};
-
-&spi1 {
-	status = "okay";
 };
 
 &gpio0 {
@@ -152,7 +52,19 @@
 	status = "okay";
 };
 
-//enabled in socfpga_cyclone5.dtsi
-&gmac1 {
-	status = "disabled";
+&i2c2 {
+	status = "okay";
+};
+
+&mmc0 {
+	vmmc-supply = <&regulator_3_3v>;
+	vqmmc-supply = <&regulator_3_3v>;
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&usb1 {
+	status = "okay";
 };
