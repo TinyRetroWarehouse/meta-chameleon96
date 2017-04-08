@@ -1,0 +1,1699 @@
+From 036af219d9174905b16cbbc878041bea661b4d6e Mon Sep 17 00:00:00 2001
+From: Dan Negvesky <dnegvesky@arrow.com>
+Date: Sat, 8 Apr 2017 11:25:24 -0400
+Subject: [PATCH 1/1] arm: socfpga: add support for Arrow Chameleon96 board
+
+Signed-off-by: Dan Negvesky <dnegvesky@arrow.com>
+---
+ .gitignore                                    |   3 +
+ arch/arm/dts/Makefile                         |   1 +
+ arch/arm/dts/socfpga_cyclone5_chameleon96.dts |  51 ++
+ arch/arm/mach-socfpga/Kconfig                 |   7 +
+ board/arrow/chameleon96/MAINTAINERS           |   5 +
+ board/arrow/chameleon96/Makefile              |   9 +
+ board/arrow/chameleon96/qts/iocsr_config.h    | 660 ++++++++++++++++++++++++++
+ board/arrow/chameleon96/qts/pinmux_config.h   | 219 +++++++++
+ board/arrow/chameleon96/qts/pll_config.h      |  85 ++++
+ board/arrow/chameleon96/qts/sdram_config.h    | 341 +++++++++++++
+ board/arrow/chameleon96/socfpga.c             |   6 +
+ configs/socfpga_chameleon96_defconfig         |  64 +++
+ include/configs/socfpga_chameleon96.h         | 101 ++++
+ 13 files changed, 1552 insertions(+)
+ create mode 100644 arch/arm/dts/socfpga_cyclone5_chameleon96.dts
+ create mode 100644 board/arrow/chameleon96/MAINTAINERS
+ create mode 100644 board/arrow/chameleon96/Makefile
+ create mode 100644 board/arrow/chameleon96/qts/iocsr_config.h
+ create mode 100644 board/arrow/chameleon96/qts/pinmux_config.h
+ create mode 100644 board/arrow/chameleon96/qts/pll_config.h
+ create mode 100644 board/arrow/chameleon96/qts/sdram_config.h
+ create mode 100644 board/arrow/chameleon96/socfpga.c
+ create mode 100644 configs/socfpga_chameleon96_defconfig
+ create mode 100644 include/configs/socfpga_chameleon96.h
+
+diff --git a/.gitignore b/.gitignore
+index 7fac5b3..6cc6cd7 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -84,3 +84,6 @@ GTAGS
+ *.orig
+ *~
+ \#*#
++
++# DS5 script
++uboot.ds
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index eb68c20..7817ee2 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -143,6 +143,7 @@ dtb-$(CONFIG_ARCH_SOCFPGA) +=				\
+ 	socfpga_cyclone5_is1.dtb			\
+ 	socfpga_cyclone5_mcvevk.dtb			\
+ 	socfpga_cyclone5_socdk.dtb			\
++	socfpga_cyclone5_chameleon96.dtb		\
+ 	socfpga_cyclone5_de0_nano_soc.dtb			\
+ 	socfpga_cyclone5_de1_soc.dtb			\
+ 	socfpga_cyclone5_sockit.dtb			\
+diff --git a/arch/arm/dts/socfpga_cyclone5_chameleon96.dts b/arch/arm/dts/socfpga_cyclone5_chameleon96.dts
+new file mode 100644
+index 0000000..32e5529
+--- /dev/null
++++ b/arch/arm/dts/socfpga_cyclone5_chameleon96.dts
+@@ -0,0 +1,51 @@
++/*
++ * Copyright Arrow Electronics, Inc. (C) 2017
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++
++#include "socfpga_cyclone5.dtsi"
++
++/ {
++	model = "Arrow Chameleon96 Board";
++	compatible = "altr,socfpga-cyclone5", "altr,socfpga";
++
++	chosen {
++		bootargs = "console=ttyS0,115200";
++	};
++
++	memory {
++		name = "memory";
++		device_type = "memory";
++		reg = <0x0 0x20000000>; /* 512MB */
++	};
++
++	soc {
++		u-boot,dm-pre-reloc;
++	};
++};
++
++&gpio0 {
++	status = "okay";
++};
++
++&gpio1 {
++	status = "okay";
++};
++
++&gpio2 {
++	status = "okay";
++};
++
++&i2c2 {
++	status = "okay";
++};
++
++&mmc0 {
++	status = "okay";
++	u-boot,dm-pre-reloc;
++};
++
++&usb1 {
++	status = "okay";
++};
+\ No newline at end of file
+diff --git a/arch/arm/mach-socfpga/Kconfig b/arch/arm/mach-socfpga/Kconfig
+index e56b3db..c4f74a8 100644
+--- a/arch/arm/mach-socfpga/Kconfig
++++ b/arch/arm/mach-socfpga/Kconfig
+@@ -52,6 +52,10 @@ config TARGET_SOCFPGA_ARRIA5_SOCDK
+ 	bool "Altera SOCFPGA SoCDK (Arria V)"
+ 	select TARGET_SOCFPGA_ARRIA5
+ 
++config TARGET_SOCFPGA_ARROW_CHAMELEON96
++	bool "Arrow Chameleon96 (Cyclone V)"
++	select TARGET_SOCFPGA_CYCLONE5
++
+ config TARGET_SOCFPGA_CYCLONE5_SOCDK
+ 	bool "Altera SOCFPGA SoCDK (Cyclone V)"
+ 	select TARGET_SOCFPGA_CYCLONE5
+@@ -93,6 +97,7 @@ endchoice
+ 
+ config SYS_BOARD
+ 	default "arria5-socdk" if TARGET_SOCFPGA_ARRIA5_SOCDK
++	default "chameleon96" if TARGET_SOCFPGA_ARROW_CHAMELEON96
+ 	default "cyclone5-socdk" if TARGET_SOCFPGA_CYCLONE5_SOCDK
+ 	default "de0-nano-soc" if TARGET_SOCFPGA_TERASIC_DE0_NANO
+ 	default "de1-soc" if TARGET_SOCFPGA_TERASIC_DE1_SOC
+@@ -106,6 +111,7 @@ config SYS_BOARD
+ config SYS_VENDOR
+ 	default "altera" if TARGET_SOCFPGA_ARRIA5_SOCDK
+ 	default "altera" if TARGET_SOCFPGA_CYCLONE5_SOCDK
++	default "arrow" if TARGET_SOCFPGA_ARROW_CHAMELEON96
+ 	default "denx" if TARGET_SOCFPGA_DENX_MCVEVK
+ 	default "ebv" if TARGET_SOCFPGA_EBV_SOCRATES
+ 	default "samtec" if TARGET_SOCFPGA_SAMTEC_VINING_FPGA
+@@ -118,6 +124,7 @@ config SYS_SOC
+ 
+ config SYS_CONFIG_NAME
+ 	default "socfpga_arria5_socdk" if TARGET_SOCFPGA_ARRIA5_SOCDK
++	default "socfpga_chameleon96" if TARGET_SOCFPGA_ARROW_CHAMELEON96
+ 	default "socfpga_cyclone5_socdk" if TARGET_SOCFPGA_CYCLONE5_SOCDK
+ 	default "socfpga_de0_nano_soc" if TARGET_SOCFPGA_TERASIC_DE0_NANO
+ 	default "socfpga_de1_soc" if TARGET_SOCFPGA_TERASIC_DE1_SOC
+diff --git a/board/arrow/chameleon96/MAINTAINERS b/board/arrow/chameleon96/MAINTAINERS
+new file mode 100644
+index 0000000..98e2c31
+--- /dev/null
++++ b/board/arrow/chameleon96/MAINTAINERS
+@@ -0,0 +1,5 @@
++CHAMELEON96 BOARD
++M:	Dan Negvesky <dan.negvesky@gmail.com>
++S:	Maintained
++F:	include/configs/socfpga_chameleon96.h
++F:	configs/socfpga_chameleon96_defconfig
+diff --git a/board/arrow/chameleon96/Makefile b/board/arrow/chameleon96/Makefile
+new file mode 100644
+index 0000000..86f9b78
+--- /dev/null
++++ b/board/arrow/chameleon96/Makefile
+@@ -0,0 +1,9 @@
++#
++# (C) Copyright 2001-2006
++# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
++# (C) Copyright 2010, Thomas Chou <thomas@wytron.com.tw>
++#
++# SPDX-License-Identifier:	GPL-2.0+
++#
++
++obj-y	:= socfpga.o
+diff --git a/board/arrow/chameleon96/qts/iocsr_config.h b/board/arrow/chameleon96/qts/iocsr_config.h
+new file mode 100644
+index 0000000..f91ebe6
+--- /dev/null
++++ b/board/arrow/chameleon96/qts/iocsr_config.h
+@@ -0,0 +1,660 @@
++/*
++ * Altera SoCFPGA IOCSR configuration
++ *
++ * SPDX-License-Identifier:	BSD-3-Clause
++ */
++
++#ifndef __SOCFPGA_IOCSR_CONFIG_H__
++#define __SOCFPGA_IOCSR_CONFIG_H__
++
++#define CONFIG_HPS_IOCSR_SCANCHAIN0_LENGTH	764
++#define CONFIG_HPS_IOCSR_SCANCHAIN1_LENGTH	1719
++#define CONFIG_HPS_IOCSR_SCANCHAIN2_LENGTH	955
++#define CONFIG_HPS_IOCSR_SCANCHAIN3_LENGTH	16766
++
++const unsigned long iocsr_scan_chain0_table[] = {
++	0x00000000,
++	0x00000000,
++	0x0FF00000,
++	0xC0000000,
++	0x0000003F,
++	0x00008000,
++	0x00060180,
++	0x18060000,
++	0x18000000,
++	0x00018060,
++	0x00000000,
++	0x00004000,
++	0x000300C0,
++	0x0C030000,
++	0x0C000000,
++	0x00000030,
++	0x0000C030,
++	0x00002000,
++	0x00018060,
++	0x06018000,
++	0x06000000,
++	0x00000018,
++	0x00006018,
++	0x00001000,
++};
++
++const unsigned long iocsr_scan_chain1_table[] = {
++	0x000C0300,
++	0x300C0000,
++	0x300000C0,
++	0x000000C0,
++	0x000300C0,
++	0x80008000,
++	0x0000007F,
++	0x0001FE00,
++	0x07F80000,
++	0xE0000000,
++	0x0000001F,
++	0x00004000,
++	0x000300C0,
++	0x0C030000,
++	0x0C000000,
++	0x00000030,
++	0x0000C030,
++	0x60002000,
++	0x04001607,
++	0x00007F80,
++	0x01FE0000,
++	0xF8000000,
++	0x00000007,
++	0xB0001000,
++	0x02000B03,
++	0x002C0EC0,
++	0xB03B0008,
++	0xEC002000,
++	0x008002C0,
++	0xD8000800,
++	0x01000581,
++	0x00160760,
++	0x581D8004,
++	0x76001000,
++	0x00400160,
++	0xEC000400,
++	0x008002C0,
++	0x000B03B0,
++	0x2C0EC002,
++	0x3B000800,
++	0x002000B0,
++	0x76000200,
++	0x00400160,
++	0x000581D8,
++	0x16076001,
++	0x1D801400,
++	0x00500058,
++	0x3B000100,
++	0x002000B0,
++	0x8002C0EC,
++	0x0B03B000,
++	0x0EC00200,
++	0x0008002C,
++	0x00000080,
++};
++
++const unsigned long iocsr_scan_chain2_table[] = {
++	0x3000B03B,
++	0x00000000,
++	0x0FF00080,
++	0xC0000000,
++	0x0C002C0E,
++	0x80008000,
++	0x1800581D,
++	0x00000000,
++	0x81D80040,
++	0x60018005,
++	0x06001607,
++	0xC0004000,
++	0x28002C0E,
++	0x00B03B00,
++	0x00000030,
++	0xB0008000,
++	0x03000B03,
++	0x60002000,
++	0x14001607,
++	0x00581D80,
++	0x60760010,
++	0xD8014001,
++	0x01000581,
++	0xB0001000,
++	0x02000B03,
++	0x04000000,
++	0xB03B0000,
++	0x0000A000,
++	0x00004000,
++	0x00000800,
++};
++
++const unsigned long iocsr_scan_chain3_table[] = {
++	0x0CC20D80,
++	0x082000FF,
++	0x08024001,
++	0x00100000,
++	0x08020000,
++	0x00100000,
++	0x0A800000,
++	0x07900000,
++	0x08020000,
++	0x00100000,
++	0x00000000,
++	0x00000010,
++	0x00C00722,
++	0x00000000,
++	0x00000021,
++	0x82000004,
++	0x05400000,
++	0x03C80000,
++	0x04010000,
++	0x00080000,
++	0x05400000,
++	0x03C80000,
++	0x05400000,
++	0x03C80000,
++	0xE4400000,
++	0x00001800,
++	0x00600391,
++	0x800E4400,
++	0x00000001,
++	0x40000002,
++	0x02A00000,
++	0x01E40000,
++	0x02A00000,
++	0x01E40000,
++	0x02A00000,
++	0x01E40000,
++	0x02A00000,
++	0x01E40000,
++	0x72200000,
++	0x80000C00,
++	0x003001C8,
++	0xC0072200,
++	0x1C880000,
++	0x20000300,
++	0x00040000,
++	0x50670000,
++	0x00000010,
++	0x24590000,
++	0x00001000,
++	0xA0000034,
++	0x0D000001,
++	0xC0680A28,
++	0x41034030,
++	0x02081A00,
++	0x80A280D0,
++	0x34030C06,
++	0x01A02490,
++	0x280D0000,
++	0x30C0680A,
++	0x00000340,
++	0xD000001A,
++	0x0680A280,
++	0x10040000,
++	0x00200000,
++	0x10040000,
++	0x00200000,
++	0x15000000,
++	0x0F200000,
++	0x15000000,
++	0x0F200000,
++	0x01FE0000,
++	0x00000000,
++	0x01800E44,
++	0x00391000,
++	0x007F8006,
++	0x00000000,
++	0x0A800001,
++	0x07900000,
++	0x0A800000,
++	0x07900000,
++	0x0A800000,
++	0x07900000,
++	0x08020000,
++	0x00100000,
++	0xC8800000,
++	0x00003001,
++	0x00C00722,
++	0x00000FF0,
++	0x72200000,
++	0x80000C00,
++	0x05400000,
++	0x02480000,
++	0x04000000,
++	0x00080000,
++	0x05400000,
++	0x03C80000,
++	0x05400000,
++	0x03C80000,
++	0x6A1C0000,
++	0x00001800,
++	0x00600391,
++	0x800E4400,
++	0x1A870001,
++	0x40000600,
++	0x02A00040,
++	0x01E40000,
++	0x02A00000,
++	0x01E40000,
++	0x02A00000,
++	0x01E40000,
++	0x02A00000,
++	0x01E40000,
++	0x72200000,
++	0x80000C00,
++	0x003001C8,
++	0xC0072200,
++	0x1C880000,
++	0x20000300,
++	0x00040000,
++	0x50670000,
++	0x00000010,
++	0x24590000,
++	0x00001000,
++	0xA0000034,
++	0x0D000001,
++	0xC0680A28,
++	0x49034030,
++	0x12481A02,
++	0x80A280D0,
++	0x34030C06,
++	0x01A00040,
++	0x280D0002,
++	0x30C0680A,
++	0x02490340,
++	0xD012481A,
++	0x0680A280,
++	0x10040000,
++	0x00200000,
++	0x10040000,
++	0x00200000,
++	0x15000000,
++	0x0F200000,
++	0x15000000,
++	0x0F200000,
++	0x01FE0000,
++	0x00000000,
++	0x01800E44,
++	0x00391000,
++	0x007F8006,
++	0x00000000,
++	0x99300001,
++	0x34343400,
++	0xAA0D4000,
++	0x01C3A800,
++	0xAA0D4000,
++	0x01C3A800,
++	0xAA0D4000,
++	0x01C3A800,
++	0x00040100,
++	0x00000800,
++	0x00000000,
++	0x00001208,
++	0x00482000,
++	0x01000000,
++	0x00000000,
++	0x00410482,
++	0x0006A000,
++	0x0001B400,
++	0x00020000,
++	0x00000400,
++	0x0002A000,
++	0x0001E400,
++	0x5506A000,
++	0x00E1D400,
++	0x00000000,
++	0xC880090C,
++	0x00003001,
++	0x90400000,
++	0x00000000,
++	0x2020C243,
++	0x2A835000,
++	0x0070EA00,
++	0x2A835000,
++	0x0070EA00,
++	0x2A835000,
++	0x0070EA00,
++	0x00010040,
++	0x00000200,
++	0x00000000,
++	0x00000482,
++	0x00120800,
++	0x00002000,
++	0x80000000,
++	0x00104120,
++	0x00000200,
++	0xAC0D5F80,
++	0xFFFFFFFF,
++	0x14F3690D,
++	0x1A041414,
++	0x00D00000,
++	0x14864000,
++	0x69A47A05,
++	0x8228A3D4,
++	0xF691451E,
++	0x0348D348,
++	0x821A0000,
++	0x0000D000,
++	0x05140680,
++	0xDC59647A,
++	0x1E8228A3,
++	0x48F69145,
++	0x00035092,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x000A8000,
++	0x00075000,
++	0x541A8000,
++	0x03875001,
++	0x0000FF00,
++	0x00000000,
++	0x0080C000,
++	0x41000000,
++	0x00003FC2,
++	0x00820000,
++	0xAA0D4000,
++	0x01C3A800,
++	0xAA0D4000,
++	0x01C3A800,
++	0xAA0D4000,
++	0x01C3A800,
++	0x00040100,
++	0x00000800,
++	0x00000000,
++	0x00001208,
++	0xF8482000,
++	0x00000007,
++	0x00000000,
++	0x00410482,
++	0x0006A000,
++	0x0001B400,
++	0x00020000,
++	0x00000400,
++	0x00020080,
++	0x00000400,
++	0x5506A000,
++	0x00E1D400,
++	0x00000000,
++	0x0000090C,
++	0x00000010,
++	0x90400000,
++	0x00000000,
++	0x2020C243,
++	0x2A835000,
++	0x0070EA00,
++	0x2A835000,
++	0x0070EA00,
++	0x2A835000,
++	0x0070EA00,
++	0x00015000,
++	0x0000F200,
++	0x00000000,
++	0x00000482,
++	0x00120800,
++	0x00600391,
++	0x80000000,
++	0x00104120,
++	0x00000200,
++	0xAC0D5F80,
++	0xFFFFFFFF,
++	0x14F3690D,
++	0x1A041414,
++	0x00D00000,
++	0x14864000,
++	0x59647A05,
++	0xC32CA3DC,
++	0xF699651E,
++	0x0358D348,
++	0x821A028A,
++	0x0000D000,
++	0x00000680,
++	0xD259647A,
++	0x1EC32CA3,
++	0x48F59965,
++	0x000358D3,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x000A8000,
++	0x00075000,
++	0x541A8000,
++	0x03875001,
++	0x0000FF00,
++	0x00000000,
++	0x0080C000,
++	0x41000000,
++	0x00003FC2,
++	0x00820000,
++	0x00040100,
++	0x00000800,
++	0x00040100,
++	0x00000800,
++	0x00040100,
++	0x00000800,
++	0x00040100,
++	0x00000800,
++	0x08000000,
++	0x00000000,
++	0xF8000020,
++	0x00000007,
++	0x02000000,
++	0x00400000,
++	0x00020080,
++	0x00000400,
++	0x00020080,
++	0x00000400,
++	0x0002A000,
++	0x0001E400,
++	0x00020080,
++	0x00000400,
++	0x04000000,
++	0xC8800000,
++	0x00003001,
++	0x00004000,
++	0x01000000,
++	0x00200000,
++	0x00010040,
++	0x00000200,
++	0x00010040,
++	0x00000200,
++	0x00010040,
++	0x00000200,
++	0x00010040,
++	0x00000200,
++	0x02000000,
++	0x00000000,
++	0xFE000008,
++	0x00000001,
++	0x00800000,
++	0x00100000,
++	0x00000200,
++	0x08283380,
++	0x00000000,
++	0x00122C80,
++	0x1A000008,
++	0x00D00000,
++	0x00068000,
++	0x00003400,
++	0x000001A0,
++	0x6800000D,
++	0x03400000,
++	0x001A0000,
++	0x0000D000,
++	0x00000680,
++	0xA0000034,
++	0x0D000001,
++	0x00680000,
++	0x00034000,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x0000FF00,
++	0x00000000,
++	0x00000040,
++	0x00010000,
++	0x00003FC0,
++	0x00800000,
++	0x00040100,
++	0x00000800,
++	0x00040100,
++	0x00000800,
++	0x00040100,
++	0x00000800,
++	0x00040100,
++	0x00000800,
++	0x08000000,
++	0x00000000,
++	0xF8000020,
++	0x00000007,
++	0x02000000,
++	0x00400000,
++	0x00020080,
++	0x00000400,
++	0x00020080,
++	0x00000400,
++	0x00020080,
++	0x00000400,
++	0x00020080,
++	0x00000400,
++	0x04000000,
++	0x00FF0000,
++	0x00000000,
++	0x00004000,
++	0x01000000,
++	0x00200000,
++	0x00010040,
++	0x00000200,
++	0x00010040,
++	0x00000200,
++	0x00010040,
++	0x00000200,
++	0x00010040,
++	0x00000200,
++	0x02000000,
++	0x00000004,
++	0x00001008,
++	0x00402000,
++	0x00800000,
++	0x00100001,
++	0x00000200,
++	0x08283380,
++	0x00000000,
++	0x00102C80,
++	0x1A000008,
++	0x00D00000,
++	0x00068000,
++	0x00003400,
++	0x000001A0,
++	0x6800000D,
++	0x03400000,
++	0x001A0000,
++	0x0000D000,
++	0x00000680,
++	0xA0000034,
++	0x0D000001,
++	0x00680000,
++	0x00034000,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x00080200,
++	0x00001000,
++	0x0000FF00,
++	0x00000000,
++	0x00000040,
++	0x00010000,
++	0x00003FC0,
++	0x00800000,
++	0x00489800,
++	0x9E1A0000,
++	0x00000200,
++	0x80000004,
++	0x00000200,
++	0x80000004,
++	0x00000200,
++	0x80000004,
++	0x00000200,
++	0xC0000004,
++	0x0000003F,
++	0x0000FF00,
++	0x03FC0000,
++	0xF0000000,
++	0x0000000F,
++	0x40002000,
++	0x00000100,
++	0x40000002,
++	0x00000100,
++	0x40000002,
++	0x00000100,
++	0x40000002,
++	0x00000100,
++	0xE0000002,
++	0x0000001F,
++	0x00007F80,
++	0x01FE0000,
++	0xF8000000,
++	0x00000007,
++	0x20001000,
++	0x00000080,
++	0x20000001,
++	0x00000080,
++	0x20000001,
++	0x00000080,
++	0x20000001,
++	0x00000080,
++	0xF0000001,
++	0x0000000F,
++	0x00003FC0,
++	0x00FF0000,
++	0xFC000000,
++	0x00000003,
++	0x00000800,
++	0xC0000001,
++	0x00041419,
++	0x40000000,
++	0x04000816,
++	0x000D0000,
++	0x00006800,
++	0x00000340,
++	0xD000001A,
++	0x06800000,
++	0x00340000,
++	0x0001A000,
++	0x00000D00,
++	0x40000068,
++	0x1A000003,
++	0x00D00000,
++	0x00068000,
++	0x00003400,
++	0x000001A0,
++	0x00000401,
++	0x00000008,
++	0x00000401,
++	0x00000008,
++	0x00000401,
++	0x00000008,
++	0x00000401,
++	0x80000008,
++	0x0000007F,
++	0x0001FE00,
++	0x07F80000,
++	0xE0000000,
++	0x0000001F,
++	0x00004000,
++};
++
++
++#endif /* __SOCFPGA_IOCSR_CONFIG_H__ */
+diff --git a/board/arrow/chameleon96/qts/pinmux_config.h b/board/arrow/chameleon96/qts/pinmux_config.h
+new file mode 100644
+index 0000000..309741d
+--- /dev/null
++++ b/board/arrow/chameleon96/qts/pinmux_config.h
+@@ -0,0 +1,219 @@
++/*
++ * Altera SoCFPGA PinMux configuration
++ *
++ * SPDX-License-Identifier:	BSD-3-Clause
++ */
++
++#ifndef __SOCFPGA_PINMUX_CONFIG_H__
++#define __SOCFPGA_PINMUX_CONFIG_H__
++
++const u8 sys_mgr_init_table[] = {
++	0, /* EMACIO0 */
++	2, /* EMACIO1 */
++	2, /* EMACIO2 */
++	2, /* EMACIO3 */
++	2, /* EMACIO4 */
++	2, /* EMACIO5 */
++	2, /* EMACIO6 */
++	2, /* EMACIO7 */
++	2, /* EMACIO8 */
++	0, /* EMACIO9 */
++	2, /* EMACIO10 */
++	2, /* EMACIO11 */
++	2, /* EMACIO12 */
++	2, /* EMACIO13 */
++	0, /* EMACIO14 */
++	0, /* EMACIO15 */
++	0, /* EMACIO16 */
++	0, /* EMACIO17 */
++	0, /* EMACIO18 */
++	0, /* EMACIO19 */
++	3, /* FLASHIO0 */
++	0, /* FLASHIO1 */
++	3, /* FLASHIO2 */
++	3, /* FLASHIO3 */
++	0, /* FLASHIO4 */
++	0, /* FLASHIO5 */
++	0, /* FLASHIO6 */
++	0, /* FLASHIO7 */
++	0, /* FLASHIO8 */
++	3, /* FLASHIO9 */
++	3, /* FLASHIO10 */
++	3, /* FLASHIO11 */
++	0, /* GENERALIO0 */
++	0, /* GENERALIO1 */
++	0, /* GENERALIO2 */
++	1, /* GENERALIO3 */
++	1, /* GENERALIO4 */
++	0, /* GENERALIO5 */
++	0, /* GENERALIO6 */
++	1, /* GENERALIO7 */
++	1, /* GENERALIO8 */
++	3, /* GENERALIO9 */
++	3, /* GENERALIO10 */
++	3, /* GENERALIO11 */
++	3, /* GENERALIO12 */
++	3, /* GENERALIO13 */
++	3, /* GENERALIO14 */
++	1, /* GENERALIO15 */
++	1, /* GENERALIO16 */
++	1, /* GENERALIO17 */
++	1, /* GENERALIO18 */
++	0, /* GENERALIO19 */
++	0, /* GENERALIO20 */
++	0, /* GENERALIO21 */
++	0, /* GENERALIO22 */
++	0, /* GENERALIO23 */
++	0, /* GENERALIO24 */
++	0, /* GENERALIO25 */
++	0, /* GENERALIO26 */
++	0, /* GENERALIO27 */
++	0, /* GENERALIO28 */
++	0, /* GENERALIO29 */
++	0, /* GENERALIO30 */
++	0, /* GENERALIO31 */
++	0, /* MIXED1IO0 */
++	0, /* MIXED1IO1 */
++	0, /* MIXED1IO2 */
++	0, /* MIXED1IO3 */
++	0, /* MIXED1IO4 */
++	0, /* MIXED1IO5 */
++	1, /* MIXED1IO6 */
++	1, /* MIXED1IO7 */
++	0, /* MIXED1IO8 */
++	0, /* MIXED1IO9 */
++	0, /* MIXED1IO10 */
++	0, /* MIXED1IO11 */
++	0, /* MIXED1IO12 */
++	0, /* MIXED1IO13 */
++	0, /* MIXED1IO14 */
++	0, /* MIXED1IO15 */
++	0, /* MIXED1IO16 */
++	0, /* MIXED1IO17 */
++	0, /* MIXED1IO18 */
++	0, /* MIXED1IO19 */
++	0, /* MIXED1IO20 */
++	0, /* MIXED1IO21 */
++	0, /* MIXED2IO0 */
++	0, /* MIXED2IO1 */
++	0, /* MIXED2IO2 */
++	0, /* MIXED2IO3 */
++	0, /* MIXED2IO4 */
++	0, /* MIXED2IO5 */
++	0, /* MIXED2IO6 */
++	0, /* MIXED2IO7 */
++	0, /* GPLINMUX48 */
++	0, /* GPLINMUX49 */
++	0, /* GPLINMUX50 */
++	0, /* GPLINMUX51 */
++	0, /* GPLINMUX52 */
++	0, /* GPLINMUX53 */
++	0, /* GPLINMUX54 */
++	0, /* GPLINMUX55 */
++	0, /* GPLINMUX56 */
++	0, /* GPLINMUX57 */
++	0, /* GPLINMUX58 */
++	0, /* GPLINMUX59 */
++	0, /* GPLINMUX60 */
++	0, /* GPLINMUX61 */
++	0, /* GPLINMUX62 */
++	0, /* GPLINMUX63 */
++	0, /* GPLINMUX64 */
++	0, /* GPLINMUX65 */
++	0, /* GPLINMUX66 */
++	0, /* GPLINMUX67 */
++	0, /* GPLINMUX68 */
++	0, /* GPLINMUX69 */
++	0, /* GPLINMUX70 */
++	1, /* GPLMUX0 */
++	1, /* GPLMUX1 */
++	1, /* GPLMUX2 */
++	1, /* GPLMUX3 */
++	1, /* GPLMUX4 */
++	1, /* GPLMUX5 */
++	1, /* GPLMUX6 */
++	1, /* GPLMUX7 */
++	1, /* GPLMUX8 */
++	1, /* GPLMUX9 */
++	1, /* GPLMUX10 */
++	1, /* GPLMUX11 */
++	1, /* GPLMUX12 */
++	1, /* GPLMUX13 */
++	1, /* GPLMUX14 */
++	1, /* GPLMUX15 */
++	1, /* GPLMUX16 */
++	1, /* GPLMUX17 */
++	1, /* GPLMUX18 */
++	1, /* GPLMUX19 */
++	1, /* GPLMUX20 */
++	1, /* GPLMUX21 */
++	1, /* GPLMUX22 */
++	1, /* GPLMUX23 */
++	1, /* GPLMUX24 */
++	1, /* GPLMUX25 */
++	1, /* GPLMUX26 */
++	1, /* GPLMUX27 */
++	1, /* GPLMUX28 */
++	1, /* GPLMUX29 */
++	1, /* GPLMUX30 */
++	1, /* GPLMUX31 */
++	1, /* GPLMUX32 */
++	1, /* GPLMUX33 */
++	1, /* GPLMUX34 */
++	1, /* GPLMUX35 */
++	1, /* GPLMUX36 */
++	1, /* GPLMUX37 */
++	1, /* GPLMUX38 */
++	1, /* GPLMUX39 */
++	1, /* GPLMUX40 */
++	1, /* GPLMUX41 */
++	1, /* GPLMUX42 */
++	1, /* GPLMUX43 */
++	1, /* GPLMUX44 */
++	1, /* GPLMUX45 */
++	1, /* GPLMUX46 */
++	1, /* GPLMUX47 */
++	1, /* GPLMUX48 */
++	1, /* GPLMUX49 */
++	1, /* GPLMUX50 */
++	1, /* GPLMUX51 */
++	1, /* GPLMUX52 */
++	1, /* GPLMUX53 */
++	1, /* GPLMUX54 */
++	1, /* GPLMUX55 */
++	1, /* GPLMUX56 */
++	1, /* GPLMUX57 */
++	1, /* GPLMUX58 */
++	1, /* GPLMUX59 */
++	1, /* GPLMUX60 */
++	1, /* GPLMUX61 */
++	1, /* GPLMUX62 */
++	1, /* GPLMUX63 */
++	1, /* GPLMUX64 */
++	1, /* GPLMUX65 */
++	1, /* GPLMUX66 */
++	1, /* GPLMUX67 */
++	1, /* GPLMUX68 */
++	1, /* GPLMUX69 */
++	1, /* GPLMUX70 */
++	0, /* NANDUSEFPGA */
++	0, /* UART0USEFPGA */
++	0, /* RGMII1USEFPGA */
++	0, /* SPIS0USEFPGA */
++	0, /* CAN0USEFPGA */
++	0, /* I2C0USEFPGA */
++	0, /* SDMMCUSEFPGA */
++	0, /* QSPIUSEFPGA */
++	0, /* SPIS1USEFPGA */
++	0, /* RGMII0USEFPGA */
++	1, /* UART1USEFPGA */
++	0, /* CAN1USEFPGA */
++	0, /* USB1USEFPGA */
++	0, /* I2C3USEFPGA */
++	1, /* I2C2USEFPGA */
++	0, /* I2C1USEFPGA */
++	0, /* SPIM1USEFPGA */
++	0, /* USB0USEFPGA */
++	0 /* SPIM0USEFPGA */
++};
++#endif /* __SOCFPGA_PINMUX_CONFIG_H__ */
+diff --git a/board/arrow/chameleon96/qts/pll_config.h b/board/arrow/chameleon96/qts/pll_config.h
+new file mode 100644
+index 0000000..4b37c02
+--- /dev/null
++++ b/board/arrow/chameleon96/qts/pll_config.h
+@@ -0,0 +1,85 @@
++/*
++ * Altera SoCFPGA Clock and PLL configuration
++ *
++ * SPDX-License-Identifier:	BSD-3-Clause
++ */
++
++#ifndef __SOCFPGA_PLL_CONFIG_H__
++#define __SOCFPGA_PLL_CONFIG_H__
++
++#define CONFIG_HPS_DBCTRL_STAYOSC1 1
++
++#define CONFIG_HPS_MAINPLLGRP_VCO_DENOM 0
++#define CONFIG_HPS_MAINPLLGRP_VCO_NUMER 47
++#define CONFIG_HPS_MAINPLLGRP_MPUCLK_CNT 0
++#define CONFIG_HPS_MAINPLLGRP_MAINCLK_CNT 0
++#define CONFIG_HPS_MAINPLLGRP_DBGATCLK_CNT 0
++#define CONFIG_HPS_MAINPLLGRP_MAINQSPICLK_CNT 511
++#define CONFIG_HPS_MAINPLLGRP_MAINNANDSDMMCCLK_CNT 511
++#define CONFIG_HPS_MAINPLLGRP_CFGS2FUSER0CLK_CNT 23
++#define CONFIG_HPS_MAINPLLGRP_MAINDIV_L3MPCLK 1
++#define CONFIG_HPS_MAINPLLGRP_MAINDIV_L3SPCLK 1
++#define CONFIG_HPS_MAINPLLGRP_MAINDIV_L4MPCLK 1
++#define CONFIG_HPS_MAINPLLGRP_MAINDIV_L4SPCLK 1
++#define CONFIG_HPS_MAINPLLGRP_DBGDIV_DBGATCLK 0
++#define CONFIG_HPS_MAINPLLGRP_DBGDIV_DBGCLK 1
++#define CONFIG_HPS_MAINPLLGRP_TRACEDIV_TRACECLK 0
++#define CONFIG_HPS_MAINPLLGRP_L4SRC_L4MP 1
++#define CONFIG_HPS_MAINPLLGRP_L4SRC_L4SP 1
++
++#define CONFIG_HPS_PERPLLGRP_VCO_DENOM 0
++#define CONFIG_HPS_PERPLLGRP_VCO_NUMER 39
++#define CONFIG_HPS_PERPLLGRP_VCO_PSRC 0
++#define CONFIG_HPS_PERPLLGRP_EMAC0CLK_CNT 511
++#define CONFIG_HPS_PERPLLGRP_EMAC1CLK_CNT 511
++#define CONFIG_HPS_PERPLLGRP_PERQSPICLK_CNT 511
++#define CONFIG_HPS_PERPLLGRP_PERNANDSDMMCCLK_CNT 4
++#define CONFIG_HPS_PERPLLGRP_PERBASECLK_CNT 4
++#define CONFIG_HPS_PERPLLGRP_S2FUSER1CLK_CNT 511
++#define CONFIG_HPS_PERPLLGRP_DIV_USBCLK 0
++#define CONFIG_HPS_PERPLLGRP_DIV_SPIMCLK 0
++#define CONFIG_HPS_PERPLLGRP_DIV_CAN0CLK 4
++#define CONFIG_HPS_PERPLLGRP_DIV_CAN1CLK 4
++#define CONFIG_HPS_PERPLLGRP_GPIODIV_GPIODBCLK 6249
++#define CONFIG_HPS_PERPLLGRP_SRC_SDMMC 2
++#define CONFIG_HPS_PERPLLGRP_SRC_NAND 2
++#define CONFIG_HPS_PERPLLGRP_SRC_QSPI 1
++
++#define CONFIG_HPS_SDRPLLGRP_VCO_DENOM 0
++#define CONFIG_HPS_SDRPLLGRP_VCO_NUMER 23
++#define CONFIG_HPS_SDRPLLGRP_VCO_SSRC 0
++#define CONFIG_HPS_SDRPLLGRP_DDRDQSCLK_CNT 1
++#define CONFIG_HPS_SDRPLLGRP_DDRDQSCLK_PHASE 0
++#define CONFIG_HPS_SDRPLLGRP_DDR2XDQSCLK_CNT 0
++#define CONFIG_HPS_SDRPLLGRP_DDR2XDQSCLK_PHASE 0
++#define CONFIG_HPS_SDRPLLGRP_DDRDQCLK_CNT 1
++#define CONFIG_HPS_SDRPLLGRP_DDRDQCLK_PHASE 4
++#define CONFIG_HPS_SDRPLLGRP_S2FUSER2CLK_CNT 1
++#define CONFIG_HPS_SDRPLLGRP_S2FUSER2CLK_PHASE 0
++
++#define CONFIG_HPS_CLK_OSC1_HZ 25000000
++#define CONFIG_HPS_CLK_OSC2_HZ 25000000
++#define CONFIG_HPS_CLK_F2S_SDR_REF_HZ 0
++#define CONFIG_HPS_CLK_F2S_PER_REF_HZ 0
++#define CONFIG_HPS_CLK_MAINVCO_HZ 1200000000
++#define CONFIG_HPS_CLK_PERVCO_HZ 1000000000
++#define CONFIG_HPS_CLK_SDRVCO_HZ 600000000
++#define CONFIG_HPS_CLK_EMAC0_HZ 1953125
++#define CONFIG_HPS_CLK_EMAC1_HZ 1953125
++#define CONFIG_HPS_CLK_USBCLK_HZ 200000000
++#define CONFIG_HPS_CLK_NAND_HZ 50000000
++#define CONFIG_HPS_CLK_SDMMC_HZ 200000000
++#define CONFIG_HPS_CLK_QSPI_HZ 2343750
++#define CONFIG_HPS_CLK_SPIM_HZ 200000000
++#define CONFIG_HPS_CLK_CAN0_HZ 12500000
++#define CONFIG_HPS_CLK_CAN1_HZ 12500000
++#define CONFIG_HPS_CLK_GPIODB_HZ 32000
++#define CONFIG_HPS_CLK_L4_MP_HZ 100000000
++#define CONFIG_HPS_CLK_L4_SP_HZ 100000000
++
++#define CONFIG_HPS_ALTERAGRP_MPUCLK 1
++#define CONFIG_HPS_ALTERAGRP_MAINCLK 3
++#define CONFIG_HPS_ALTERAGRP_DBGATCLK 3
++
++
++#endif /* __SOCFPGA_PLL_CONFIG_H__ */
+diff --git a/board/arrow/chameleon96/qts/sdram_config.h b/board/arrow/chameleon96/qts/sdram_config.h
+new file mode 100644
+index 0000000..82344d3
+--- /dev/null
++++ b/board/arrow/chameleon96/qts/sdram_config.h
+@@ -0,0 +1,341 @@
++/*
++ * Altera SoCFPGA SDRAM configuration
++ *
++ * SPDX-License-Identifier:	BSD-3-Clause
++ */
++
++#ifndef __SOCFPGA_SDRAM_CONFIG_H__
++#define __SOCFPGA_SDRAM_CONFIG_H__
++
++/* SDRAM configuration */
++#define CONFIG_HPS_SDR_CTRLCFG_CPORTRDWR_CPORTRDWR		0x5A56A
++#define CONFIG_HPS_SDR_CTRLCFG_CPORTRMAP_CPORTRMAP		0xB00088
++#define CONFIG_HPS_SDR_CTRLCFG_CPORTWIDTH_CPORTWIDTH		0x44555
++#define CONFIG_HPS_SDR_CTRLCFG_CPORTWMAP_CPORTWMAP		0x2C011000
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_ADDRORDER		0
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_DQSTRKEN			0
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_ECCCORREN		0
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_ECCEN			0
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_MEMBL			8
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_MEMTYPE			2
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_NODMPINS			0
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_REORDEREN		1
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLCFG_STARVELIMIT		10
++#define CONFIG_HPS_SDR_CTRLCFG_CTRLWIDTH_CTRLWIDTH		1
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMADDRW_BANKBITS		3
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMADDRW_COLBITS		10
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMADDRW_CSBITS			1
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMADDRW_ROWBITS		14
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMDEVWIDTH_DEVWIDTH		8
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMIFWIDTH_IFWIDTH		16
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMINTR_INTREN			0
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMODT_READ			0
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMODT_WRITE			1
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING1_AL			0
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING1_TCL			6
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING1_TCWL			5
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING1_TFAW			10
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING1_TRFC			49
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING1_TRRD			2
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING2_IF_TRCD		4
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING2_IF_TREFI		2341
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING2_IF_TRP		4
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING2_IF_TWR		5
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING2_IF_TWTR		4
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING3_TCCD			4
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING3_TMRD			4
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING3_TRAS			11
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING3_TRC			15
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING3_TRTP			3
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING4_PWRDOWNEXIT		3
++#define CONFIG_HPS_SDR_CTRLCFG_DRAMTIMING4_SELFRFSHEXIT		512
++#define CONFIG_HPS_SDR_CTRLCFG_FIFOCFG_INCSYNC			0
++#define CONFIG_HPS_SDR_CTRLCFG_FIFOCFG_SYNCMODE			0
++#define CONFIG_HPS_SDR_CTRLCFG_FPGAPORTRST			0x1FF
++#define CONFIG_HPS_SDR_CTRLCFG_LOWPWREQ_SELFRFSHMASK		3
++#define CONFIG_HPS_SDR_CTRLCFG_LOWPWRTIMING_AUTOPDCYCLES	0
++#define CONFIG_HPS_SDR_CTRLCFG_LOWPWRTIMING_CLKDISABLECYCLES	8
++#define CONFIG_HPS_SDR_CTRLCFG_MPPACING_0_THRESHOLD1_31_0	0x20820820
++#define CONFIG_HPS_SDR_CTRLCFG_MPPACING_1_THRESHOLD1_59_32	0x8208208
++#define CONFIG_HPS_SDR_CTRLCFG_MPPACING_1_THRESHOLD2_3_0	0
++#define CONFIG_HPS_SDR_CTRLCFG_MPPACING_2_THRESHOLD2_35_4	0x41041041
++#define CONFIG_HPS_SDR_CTRLCFG_MPPACING_3_THRESHOLD2_59_36	0x410410
++#define CONFIG_HPS_SDR_CTRLCFG_MPPRIORITY_USERPRIORITY		0x3FFD1088
++#define CONFIG_HPS_SDR_CTRLCFG_MPTHRESHOLDRST_0_THRESHOLDRSTCYCLES_31_0	0x01010101
++#define CONFIG_HPS_SDR_CTRLCFG_MPTHRESHOLDRST_1_THRESHOLDRSTCYCLES_63_32	0x01010101
++#define CONFIG_HPS_SDR_CTRLCFG_MPTHRESHOLDRST_2_THRESHOLDRSTCYCLES_79_64	0x0101
++#define CONFIG_HPS_SDR_CTRLCFG_MPWIEIGHT_0_STATICWEIGHT_31_0	0x21084210
++#define CONFIG_HPS_SDR_CTRLCFG_MPWIEIGHT_1_STATICWEIGHT_49_32	0x1EF84
++#define CONFIG_HPS_SDR_CTRLCFG_MPWIEIGHT_1_SUMOFWEIGHT_13_0	0x2020
++#define CONFIG_HPS_SDR_CTRLCFG_MPWIEIGHT_2_SUMOFWEIGHT_45_14	0x0
++#define CONFIG_HPS_SDR_CTRLCFG_MPWIEIGHT_3_SUMOFWEIGHT_63_46	0xF800
++#define CONFIG_HPS_SDR_CTRLCFG_PHYCTRL_PHYCTRL_0		0x200
++#define CONFIG_HPS_SDR_CTRLCFG_PORTCFG_AUTOPCHEN		0
++#define CONFIG_HPS_SDR_CTRLCFG_RFIFOCMAP_RFIFOCMAP		0x760210
++#define CONFIG_HPS_SDR_CTRLCFG_STATICCFG_MEMBL			2
++#define CONFIG_HPS_SDR_CTRLCFG_STATICCFG_USEECCASDATA		0
++#define CONFIG_HPS_SDR_CTRLCFG_WFIFOCMAP_WFIFOCMAP		0x980543
++
++/* Sequencer auto configuration */
++#define RW_MGR_ACTIVATE_0_AND_1	0x0D
++#define RW_MGR_ACTIVATE_0_AND_1_WAIT1	0x0E
++#define RW_MGR_ACTIVATE_0_AND_1_WAIT2	0x10
++#define RW_MGR_ACTIVATE_1	0x0F
++#define RW_MGR_CLEAR_DQS_ENABLE	0x49
++#define RW_MGR_GUARANTEED_READ	0x4C
++#define RW_MGR_GUARANTEED_READ_CONT	0x54
++#define RW_MGR_GUARANTEED_WRITE	0x18
++#define RW_MGR_GUARANTEED_WRITE_WAIT0	0x1B
++#define RW_MGR_GUARANTEED_WRITE_WAIT1	0x1F
++#define RW_MGR_GUARANTEED_WRITE_WAIT2	0x19
++#define RW_MGR_GUARANTEED_WRITE_WAIT3	0x1D
++#define RW_MGR_IDLE	0x00
++#define RW_MGR_IDLE_LOOP1	0x7B
++#define RW_MGR_IDLE_LOOP2	0x7A
++#define RW_MGR_INIT_RESET_0_CKE_0	0x6F
++#define RW_MGR_INIT_RESET_1_CKE_0	0x74
++#define RW_MGR_LFSR_WR_RD_BANK_0	0x22
++#define RW_MGR_LFSR_WR_RD_BANK_0_DATA	0x25
++#define RW_MGR_LFSR_WR_RD_BANK_0_DQS	0x24
++#define RW_MGR_LFSR_WR_RD_BANK_0_NOP	0x23
++#define RW_MGR_LFSR_WR_RD_BANK_0_WAIT	0x32
++#define RW_MGR_LFSR_WR_RD_BANK_0_WL_1	0x21
++#define RW_MGR_LFSR_WR_RD_DM_BANK_0	0x36
++#define RW_MGR_LFSR_WR_RD_DM_BANK_0_DATA	0x39
++#define RW_MGR_LFSR_WR_RD_DM_BANK_0_DQS	0x38
++#define RW_MGR_LFSR_WR_RD_DM_BANK_0_NOP	0x37
++#define RW_MGR_LFSR_WR_RD_DM_BANK_0_WAIT	0x46
++#define RW_MGR_LFSR_WR_RD_DM_BANK_0_WL_1	0x35
++#define RW_MGR_MRS0_DLL_RESET	0x02
++#define RW_MGR_MRS0_DLL_RESET_MIRR	0x08
++#define RW_MGR_MRS0_USER	0x07
++#define RW_MGR_MRS0_USER_MIRR	0x0C
++#define RW_MGR_MRS1	0x03
++#define RW_MGR_MRS1_MIRR	0x09
++#define RW_MGR_MRS2	0x04
++#define RW_MGR_MRS2_MIRR	0x0A
++#define RW_MGR_MRS3	0x05
++#define RW_MGR_MRS3_MIRR	0x0B
++#define RW_MGR_PRECHARGE_ALL	0x12
++#define RW_MGR_READ_B2B	0x59
++#define RW_MGR_READ_B2B_WAIT1	0x61
++#define RW_MGR_READ_B2B_WAIT2	0x6B
++#define RW_MGR_REFRESH_ALL	0x14
++#define RW_MGR_RETURN	0x01
++#define RW_MGR_SGLE_READ	0x7D
++#define RW_MGR_ZQCL	0x06
++
++/* Sequencer defines configuration */
++#define AFI_RATE_RATIO	1
++#define CALIB_LFIFO_OFFSET	7
++#define CALIB_VFIFO_OFFSET	5
++#define ENABLE_SUPER_QUICK_CALIBRATION	0
++#define IO_DELAY_PER_DCHAIN_TAP	25
++#define IO_DELAY_PER_DQS_EN_DCHAIN_TAP	25
++#define IO_DELAY_PER_OPA_TAP	416
++#define IO_DLL_CHAIN_LENGTH	8
++#define IO_DQDQS_OUT_PHASE_MAX	0
++#define IO_DQS_EN_DELAY_MAX	31
++#define IO_DQS_EN_DELAY_OFFSET	0
++#define IO_DQS_EN_PHASE_MAX	7
++#define IO_DQS_IN_DELAY_MAX	31
++#define IO_DQS_IN_RESERVE	4
++#define IO_DQS_OUT_RESERVE	4
++#define IO_IO_IN_DELAY_MAX	31
++#define IO_IO_OUT1_DELAY_MAX	31
++#define IO_IO_OUT2_DELAY_MAX	0
++#define IO_SHIFT_DQS_EN_WHEN_SHIFT_DQS	0
++#define MAX_LATENCY_COUNT_WIDTH	5
++#define READ_VALID_FIFO_SIZE	16
++#define REG_FILE_INIT_SEQ_SIGNATURE	0x555504a0
++#define RW_MGR_MEM_ADDRESS_MIRRORING	0
++#define RW_MGR_MEM_DATA_MASK_WIDTH	2
++#define RW_MGR_MEM_DATA_WIDTH	16
++#define RW_MGR_MEM_DQ_PER_READ_DQS	8
++#define RW_MGR_MEM_DQ_PER_WRITE_DQS	8
++#define RW_MGR_MEM_IF_READ_DQS_WIDTH	2
++#define RW_MGR_MEM_IF_WRITE_DQS_WIDTH	2
++#define RW_MGR_MEM_NUMBER_OF_CS_PER_DIMM	1
++#define RW_MGR_MEM_NUMBER_OF_RANKS	1
++#define RW_MGR_MEM_VIRTUAL_GROUPS_PER_READ_DQS	1
++#define RW_MGR_MEM_VIRTUAL_GROUPS_PER_WRITE_DQS	1
++#define RW_MGR_TRUE_MEM_DATA_MASK_WIDTH	2
++#define TINIT_CNTR0_VAL	74
++#define TINIT_CNTR1_VAL	32
++#define TINIT_CNTR2_VAL	32
++#define TRESET_CNTR0_VAL	74
++#define TRESET_CNTR1_VAL	99
++#define TRESET_CNTR2_VAL	10
++
++/* Sequencer ac_rom_init configuration */
++const u32 ac_rom_init[] = {
++	0x20700000,
++	0x20780000,
++	0x10080221,
++	0x10080320,
++	0x10090006,
++	0x100a0200,
++	0x100b0000,
++	0x10380400,
++	0x10080241,
++	0x100802c0,
++	0x100a0006,
++	0x10090200,
++	0x100b0000,
++	0x30780000,
++	0x38780000,
++	0x30780000,
++	0x10680000,
++	0x106b0000,
++	0x10280400,
++	0x10480000,
++	0x1c980000,
++	0x1c9b0000,
++	0x1c980008,
++	0x1c9b0008,
++	0x38f80000,
++	0x3cf80000,
++	0x38780000,
++	0x18180000,
++	0x18980000,
++	0x13580000,
++	0x135b0000,
++	0x13580008,
++	0x135b0008,
++	0x33780000,
++	0x10580008,
++	0x10780000
++};
++
++/* Sequencer inst_rom_init configuration */
++const u32 inst_rom_init[] = {
++	0x80000,
++	0x80680,
++	0x8180,
++	0x8200,
++	0x8280,
++	0x8300,
++	0x8380,
++	0x8100,
++	0x8480,
++	0x8500,
++	0x8580,
++	0x8600,
++	0x8400,
++	0x800,
++	0x8680,
++	0x880,
++	0xa680,
++	0x80680,
++	0x900,
++	0x80680,
++	0x980,
++	0xa680,
++	0x8680,
++	0x80680,
++	0xb68,
++	0xcce8,
++	0xae8,
++	0x8ce8,
++	0xb88,
++	0xec88,
++	0xa08,
++	0xac88,
++	0x80680,
++	0xce00,
++	0xcd80,
++	0xe700,
++	0xc00,
++	0x20ce0,
++	0x20ce0,
++	0x20ce0,
++	0x20ce0,
++	0xd00,
++	0x680,
++	0x680,
++	0x680,
++	0x680,
++	0x60e80,
++	0x61080,
++	0x61080,
++	0x61080,
++	0xa680,
++	0x8680,
++	0x80680,
++	0xce00,
++	0xcd80,
++	0xe700,
++	0xc00,
++	0x30ce0,
++	0x30ce0,
++	0x30ce0,
++	0x30ce0,
++	0xd00,
++	0x680,
++	0x680,
++	0x680,
++	0x680,
++	0x70e80,
++	0x71080,
++	0x71080,
++	0x71080,
++	0xa680,
++	0x8680,
++	0x80680,
++	0x1158,
++	0x6d8,
++	0x80680,
++	0x1168,
++	0x7e8,
++	0x7e8,
++	0x87e8,
++	0x40fe8,
++	0x410e8,
++	0x410e8,
++	0x410e8,
++	0x1168,
++	0x7e8,
++	0x7e8,
++	0xa7e8,
++	0x80680,
++	0x40e88,
++	0x41088,
++	0x41088,
++	0x41088,
++	0x40f68,
++	0x410e8,
++	0x410e8,
++	0x410e8,
++	0xa680,
++	0x40fe8,
++	0x410e8,
++	0x410e8,
++	0x410e8,
++	0x41008,
++	0x41088,
++	0x41088,
++	0x41088,
++	0x1100,
++	0xc680,
++	0x8680,
++	0xe680,
++	0x80680,
++	0x0,
++	0x8000,
++	0xa000,
++	0xc000,
++	0x80000,
++	0x80,
++	0x8080,
++	0xa080,
++	0xc080,
++	0x80080,
++	0x9180,
++	0x8680,
++	0xa680,
++	0x80680,
++	0x40f08,
++	0x80680
++};
++
++#endif /* __SOCFPGA_SDRAM_CONFIG_H__ */
+diff --git a/board/arrow/chameleon96/socfpga.c b/board/arrow/chameleon96/socfpga.c
+new file mode 100644
+index 0000000..79be7b4
+--- /dev/null
++++ b/board/arrow/chameleon96/socfpga.c
+@@ -0,0 +1,6 @@
++/*
++ *  Copyright (C) 2017 Arrow Electronics
++ *
++ * SPDX-License-Identifier: GPL-2.0+
++ */
++#include <common.h>
+diff --git a/configs/socfpga_chameleon96_defconfig b/configs/socfpga_chameleon96_defconfig
+new file mode 100644
+index 0000000..6362afd
+--- /dev/null
++++ b/configs/socfpga_chameleon96_defconfig
+@@ -0,0 +1,64 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SOCFPGA=y
++CONFIG_SYS_MALLOC_F_LEN=0x2000
++CONFIG_TARGET_SOCFPGA_CHAMELEON96=y
++CONFIG_SPL_STACK_R_ADDR=0x00800000
++CONFIG_DEFAULT_DEVICE_TREE="socfpga_cyclone5_chameleon96"
++CONFIG_DEFAULT_FDT_FILE="socfpga_cyclone5_chameleon96.dtb"
++CONFIG_FIT=y
++CONFIG_SYS_CONSOLE_IS_IN_ENV=y
++CONFIG_SYS_CONSOLE_OVERWRITE_ROUTINE=y
++CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
++CONFIG_VERSION_VARIABLE=y
++# CONFIG_DISPLAY_BOARDINFO is not set
++CONFIG_SPL=y
++CONFIG_SPL_SYS_MALLOC_SIMPLE=y
++CONFIG_SPL_STACK_R=y
++CONFIG_HUSH_PARSER=y
++CONFIG_CMD_BOOTZ=y
++# CONFIG_CMD_IMLS is not set
++CONFIG_CMD_ASKENV=y
++CONFIG_CMD_GREPENV=y
++# CONFIG_CMD_FLASH is not set
++CONFIG_CMD_MMC=y
++CONFIG_CMD_SF=y
++CONFIG_CMD_SPI=y
++CONFIG_CMD_I2C=y
++CONFIG_CMD_USB=y
++CONFIG_CMD_DFU=y
++CONFIG_CMD_USB_MASS_STORAGE=y
++CONFIG_CMD_GPIO=y
++CONFIG_CMD_DHCP=y
++CONFIG_CMD_MII=y
++CONFIG_CMD_PING=y
++CONFIG_CMD_CACHE=y
++CONFIG_CMD_EXT4=y
++CONFIG_CMD_EXT4_WRITE=y
++CONFIG_CMD_FAT=y
++CONFIG_CMD_FS_GENERIC=y
++CONFIG_CMD_UBI=y
++CONFIG_SPL_DM=y
++CONFIG_DFU_MMC=y
++CONFIG_DM_GPIO=y
++CONFIG_DWAPB_GPIO=y
++CONFIG_SYS_I2C_DW=y
++CONFIG_DM_MMC=y
++CONFIG_MMC_DW=y
++CONFIG_DM_ETH=y
++CONFIG_ETH_DESIGNWARE=y
++CONFIG_SYS_NS16550=y
++CONFIG_CADENCE_QSPI=y
++CONFIG_DESIGNWARE_SPI=y
++CONFIG_USB=y
++CONFIG_DM_USB=y
++CONFIG_USB_STORAGE=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_GADGET_DWC2_OTG=y
++CONFIG_USB_GADGET_DOWNLOAD=y
++CONFIG_G_DNL_MANUFACTURER="arrow"
++CONFIG_G_DNL_VENDOR_NUM=0x0525
++CONFIG_G_DNL_PRODUCT_NUM=0xa4a5
++CONFIG_USE_TINY_PRINTF=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_USE_PARTITION_TYPE=y
++CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_PARTITION_TYPE=0xa2
++CONFIG_GENERIC_MMC=y
+diff --git a/include/configs/socfpga_chameleon96.h b/include/configs/socfpga_chameleon96.h
+new file mode 100644
+index 0000000..559001d
+--- /dev/null
++++ b/include/configs/socfpga_chameleon96.h
+@@ -0,0 +1,101 @@
++/*
++ * Copyright (C) 2017 Arrow Electronics
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++#ifndef __CONFIG_CHAMELEON96_H__
++#define __CONFIG_CHAMELEON96_H__
++
++#include <asm/arch/base_addr_ac5.h>
++
++/* U-Boot Commands */
++#define CONFIG_FAT_WRITE
++#define CONFIG_HW_WATCHDOG
++
++/* Memory configurations */
++#define PHYS_SDRAM_1_SIZE		0x20000000	/* 500MiB */
++
++/* Booting Linux */
++#define CONFIG_BOOTFILE		"zImage"
++#define CONFIG_BOOTARGS		"console=ttyS0," __stringify(CONFIG_BAUDRATE)
++#define CONFIG_LOADADDR		0x01000000
++#define CONFIG_SYS_LOAD_ADDR	CONFIG_LOADADDR
++
++/* Ethernet on SoC (EMAC) */
++#if defined(CONFIG_CMD_NET)
++#define CONFIG_PHY_MICREL
++#define CONFIG_PHY_MICREL_KSZ9031
++#endif
++
++#define CONFIG_ENV_IS_IN_MMC
++
++#ifndef CONFIG_SPL_BUILD
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	"verify=n\0" \
++	"bootimage=" CONFIG_BOOTFILE "\0" \
++	"fdt_addr=100\0" \
++	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
++	"bootm_size=0xa000000\0" \
++	"kernel_addr_r="__stringify(CONFIG_SYS_LOAD_ADDR)"\0" \
++	"fdt_addr_r=0x02000000\0" \
++	"scriptaddr=0x02100000\0" \
++	"pxefile_addr_r=0x02200000\0" \
++	"ramdisk_addr_r=0x02300000\0" \
++	\
++	"fpga_cfg="							\
++		"env exists fpga_files || setenv fpga_files "		\
++			"${board}.rbf; "				\
++		"for target in ${boot_targets}; do "			\
++			"run fpga_cfg_${target}; "			\
++		"done\0"						\
++	\
++	"fpga_cfg_mmc0="						\
++		"setenv devnum 0; "					\
++		"setenv devtype mmc; "					\
++		"run scan_dev_for_boot_part_fpga\0"			\
++	\
++	"scan_dev_for_boot_part_fpga="					\
++		"part list ${devtype} ${devnum} -bootable devplist; "	\
++		"env exists devplist || setenv devplist 1; "		\
++		"for distro_bootpart in ${devplist}; do "		\
++			"if fstype ${devtype} "				\
++					"${devnum}:${distro_bootpart} "	\
++					"bootfstype; then "		\
++				"run scan_dev_for_boot_fpga; "		\
++			"fi; "						\
++		"done\0"						\
++	\
++	"scan_dev_for_boot_fpga="					\
++		"echo Scanning ${devtype} "				\
++			"${devnum}:${distro_bootpart}...; " 		\
++		"for prefix in ${boot_prefixes}; do "			\
++			"run scan_dev_for_fpga; "			\
++		"done\0"						\
++	\
++	"scan_dev_for_fpga="						\
++		"for file in ${fpga_files}; do "			\
++			"if test -e ${devtype} "			\
++					"${devnum}:${distro_bootpart} "	\
++					"${prefix}${file}; then "	\
++				"echo Found FPGA Configuration "	\
++					"${prefix}${file}; "		\
++				"load ${devtype} "			\
++					"${devnum}:${distro_bootpart} " \
++					"${kernel_addr_r} "		\
++					"${prefix}${file}; "		\
++				"fpga load 0 ${kernel_addr_r} "		\
++					"${filesize}; "			\
++				"bridge enable; "			\
++			"fi; "						\
++		"done\0"						\
++	\
++	BOOTENV
++
++#endif
++
++#define CONFIG_BOOTCOMMAND "run fpga_cfg; run distro_bootcmd"
++
++/* The rest of the configuration is shared */
++#include <configs/socfpga_common.h>
++
++#endif	/* __CONFIG_CHAMELEON96_H__ */
+-- 
+2.7.4
+
