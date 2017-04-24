@@ -11,8 +11,11 @@ SRCREV_hardware = "${AUTOREV}"
 
 PV="${PN}+git${SRCPV}"
 
+#SRC_URI += " \
+#	git://github.com/arrow-socfpga/chameleon96-hardware.git;destsuffix=hardware;name=hardware;protocol=https;branch=master \
+#"
 SRC_URI += " \
-	git://github.com/arrow-socfpga/chameleon96-hardware.git;destsuffix=hardware;name=hardware;protocol=https;branch=master \
+	git://github.com/dnegvesky/chameleon96-hardware.git;destsuffix=hardware;name=hardware;protocol=https;branch=hdmi-test \
 "
 
 do_install () {

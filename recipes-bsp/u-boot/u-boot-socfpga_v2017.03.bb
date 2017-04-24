@@ -14,11 +14,18 @@ SRCREV = "8537ddd769f460d7fb7a62a3dcc9669049702e51"
 SRCREV_FORMAT = "hardware"
 SRCREV_hardware = "${AUTOREV}"
 
+#SRC_URI_append = "\
+#	file://0001-arm-socfpga-Move-CONFIG_EXTRA_ENV_SETTINGS-to-common.patch \
+#	file://0002-arm-socfpga-update-terasic-sockit-to-support-distro-.patch \
+#	file://0006-arm-socfpga-fix-issue-with-warm-reset-when-CSEL-is-0.patch \
+#	git://github.com/arrow-socfpga/chameleon96-hardware.git;destsuffix=hardware;name=hardware;branch=master \
+#	"
+
 SRC_URI_append = "\
 	file://0001-arm-socfpga-Move-CONFIG_EXTRA_ENV_SETTINGS-to-common.patch \
 	file://0002-arm-socfpga-update-terasic-sockit-to-support-distro-.patch \
 	file://0006-arm-socfpga-fix-issue-with-warm-reset-when-CSEL-is-0.patch \
-	git://github.com/arrow-socfpga/chameleon96-hardware.git;destsuffix=hardware;name=hardware;branch=master \
+	git://github.com/dnegvesky/chameleon96-hardware.git;destsuffix=hardware;name=hardware;branch=hdmi-test \
 	"
 
 # Update project specific files in uboot 

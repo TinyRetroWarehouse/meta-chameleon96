@@ -9,7 +9,8 @@ PR = "r1"
 SRCREV = "${AUTOREV}"
 PV = "1.0${PR}+git${SRCPV}"
 
-SRC_URI = "git://github.com/arrow-socfpga/chameleon96-webcontent.git"
+#SRC_URI = "git://github.com/arrow-socfpga/chameleon96-webcontent.git"
+SRC_URI = "git://github.com/JustCraig/chameleon96-webcontent.git"
 S = "${WORKDIR}/git"
 
 inherit allarch
