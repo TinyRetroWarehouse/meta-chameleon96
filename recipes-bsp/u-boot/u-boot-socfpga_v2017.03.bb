@@ -25,7 +25,7 @@ SRC_URI_append = "\
 	file://0001-arm-socfpga-Move-CONFIG_EXTRA_ENV_SETTINGS-to-common.patch \
 	file://0002-arm-socfpga-add-support-for-Arrow-Chameleon96-board.patch \
 	file://0006-arm-socfpga-fix-issue-with-warm-reset-when-CSEL-is-0.patch \
-	git://github.com/dnegvesky/chameleon96-hardware.git;destsuffix=hardware;name=hardware;branch=hdmi-test \
+	git://github.com/dnegvesky/chameleon96-hardware.git;destsuffix=hardware;name=hardware;branch=add-sdio \
 	"
 
 # Update project specific files in uboot 
