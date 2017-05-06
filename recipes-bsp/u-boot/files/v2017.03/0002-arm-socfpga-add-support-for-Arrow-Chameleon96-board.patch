@@ -1,6 +1,6 @@
-From 11326383f19edf17a1ed8ec0d6f7c4f36845902f Mon Sep 17 00:00:00 2001
+From 3706b557c7f567be0bc9eb78bbddb0fb53c8b657 Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@arrow.com>
-Date: Mon, 24 Apr 2017 17:28:11 -0400
+Date: Fri, 5 May 2017 22:50:48 -0400
 Subject: [PATCH 1/1] arm: socfpga: add support for Arrow Chameleon96 board
 
 Signed-off-by: Dan Negvesky <dnegvesky@arrow.com>
@@ -16,9 +16,9 @@ Signed-off-by: Dan Negvesky <dnegvesky@arrow.com>
  board/arrow/chameleon96/qts/pll_config.h      |  85 ++++
  board/arrow/chameleon96/qts/sdram_config.h    | 341 +++++++++++++
  board/arrow/chameleon96/socfpga.c             |   6 +
- configs/socfpga_chameleon96_defconfig         |  65 +++
+ configs/socfpga_chameleon96_defconfig         |  66 +++
  include/configs/socfpga_chameleon96.h         | 101 ++++
- 13 files changed, 1553 insertions(+)
+ 13 files changed, 1554 insertions(+)
  create mode 100644 arch/arm/dts/socfpga_cyclone5_chameleon96.dts
  create mode 100644 board/arrow/chameleon96/MAINTAINERS
  create mode 100644 board/arrow/chameleon96/Makefile
@@ -1519,10 +1519,10 @@ index 0000000..79be7b4
 +#include <common.h>
 diff --git a/configs/socfpga_chameleon96_defconfig b/configs/socfpga_chameleon96_defconfig
 new file mode 100644
-index 0000000..0c5b33a
+index 0000000..c20df60
 --- /dev/null
 +++ b/configs/socfpga_chameleon96_defconfig
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,66 @@
 +CONFIG_ARM=y
 +CONFIG_ARCH_SOCFPGA=y
 +CONFIG_SYS_MALLOC_F_LEN=0x2000
@@ -1556,6 +1556,7 @@ index 0000000..0c5b33a
 +CONFIG_CMD_GPIO=y
 +CONFIG_CMD_DHCP=y
 +CONFIG_CMD_MII=y
++CONFIG_CMD_PART=y
 +CONFIG_CMD_PING=y
 +CONFIG_CMD_CACHE=y
 +CONFIG_CMD_EXT4=y
