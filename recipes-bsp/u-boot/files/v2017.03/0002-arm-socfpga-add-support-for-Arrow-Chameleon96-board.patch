@@ -1,6 +1,6 @@
-From 618bc816556bcc69030ad9d2fdd2823593f8751e Mon Sep 17 00:00:00 2001
+From 4c5e9c7478685fe6c1365521579050ad272560d5 Mon Sep 17 00:00:00 2001
 From: Dan Negvesky <dnegvesky@arrow.com>
-Date: Wed, 10 May 2017 01:12:11 -0400
+Date: Fri, 12 May 2017 20:46:12 -0400
 Subject: [PATCH 1/1] arm: socfpga: add support for Arrow Chameleon96 board
 
 Signed-off-by: Dan Negvesky <dnegvesky@arrow.com>
@@ -1591,7 +1591,7 @@ index 0000000..c20df60
 +CONFIG_GENERIC_MMC=y
 diff --git a/include/configs/socfpga_chameleon96.h b/include/configs/socfpga_chameleon96.h
 new file mode 100644
-index 0000000..1d8013a
+index 0000000..bb4461d
 --- /dev/null
 +++ b/include/configs/socfpga_chameleon96.h
 @@ -0,0 +1,123 @@
@@ -1687,13 +1687,13 @@ index 0000000..1d8013a
 +		"done\0"						\
 +	\
 +	"usb_reset="							\
-+		"gpio set porta9; "					\
++		"echo Resetting USB HUB...; "				\
 +		"gpio clear porta0; "					\
 +		"sleep 1; "						\
-+		"gpio clear porta9; "					\
 +		"gpio set porta0\0"					\
 +	\
 +	"hdmi_init="							\
++                "echo Initializing HDMI Transmitter for 1080p...; "	\
 +		"i2c dev 2; "						\
 +		"i2c mw 37 FF.1 02 1; "					\
 +                "i2c mw 73 FF.1 00 1; "					\
