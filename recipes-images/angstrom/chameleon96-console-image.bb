@@ -28,6 +28,7 @@ IMAGE_INSTALL += " \
 	python \
 	tar \
 	usbutils \
+	xfce-default-config \
 	vim \
 	vim-vimrc \
 "
