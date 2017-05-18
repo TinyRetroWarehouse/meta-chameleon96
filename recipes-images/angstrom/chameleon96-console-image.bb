@@ -8,6 +8,7 @@ IMAGE_INSTALL += " \
 	chameleon96-usb-gadget \
 	chameleon96-webcontent \
 	chameleon96-x11vnc-init \
+	chameleon96-xfce-default-config \
 	chameleon96-xfce-init \
 	ethtool \
 	gcc \
@@ -28,7 +29,6 @@ IMAGE_INSTALL += " \
 	python \
 	tar \
 	usbutils \
-	xfce-default-config \
 	vim \
 	vim-vimrc \
 "

@@ -5,6 +5,7 @@ PR = "r4"
 
 inherit allarch
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 SRC_URI = " \
     file://.config \
     file://xfce-chameleon.jpg \
