@@ -12,7 +12,11 @@ SRC_URI = " \
     "
 
 do_install() {
-    # default user configration -> /etc/skel
+    # default root user configration -> /home/root
+    install -d ${D}/home/root
+    cp -r ${WORKDIR}/.config ${D}/home/root
+    
+    # default new user configration -> /etc/skel
     install -d ${D}${sysconfdir}/skel
     cp -r ${WORKDIR}/.config ${D}${sysconfdir}/skel/
 
