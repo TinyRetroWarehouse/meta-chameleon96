@@ -25,4 +25,4 @@ do_install() {
     install -m 0644 ${WORKDIR}/xfce-chameleon.jpg ${D}${datadir}/backgrounds/xfce
 }
 
-FILES_${PN} += "${datadir}/backgrounds/xfce ${datadir}/themes"
+FILES_${PN} += "${datadir}/backgrounds/xfce /home/root"
